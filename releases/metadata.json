@@ -1,0 +1,36 @@
+{
+    "$schema": "https://go.kicad.org/pcm/schemas/v1",
+    "name": "Interactive HTML BOM (中文版)",
+    "description": "生成可交互的 HTML 物料清单 (BOM)，支持 PCB 元件高亮与快速定位。",
+    "description_full": "生成带有交互功能的 HTML BOM 页面，可视化关联 PCB 上的元件位置，支持筛选、分组、复选标记及走线/网络高亮。适合手焊原型板使用。支持 KiCad、EasyEDA、Eagle、Fusion360 和 Allegro。",
+    "identifier": "com.github.harry10086.interactivehtmlbom",
+    "type": "plugin",
+    "author": {
+        "name": "qu1ck (zh fork by harry10086)",
+        "contact": {
+            "web": "https://github.com/harry10086/InteractiveHtmlBom"
+        }
+    },
+    "maintainer": {
+        "name": "harry10086",
+        "contact": {
+            "web": "https://github.com/harry10086/InteractiveHtmlBom"
+        }
+    },
+    "license": "MIT",
+    "resources": {
+        "homepage": "https://github.com/harry10086/InteractiveHtmlBom"
+    },
+    "tags": ["bom", "ibom", "interactive", "kicad", "中文"],
+    "versions": [
+        {
+            "version": "2.11.1",
+            "status": "stable",
+            "kicad_version": "7.0",
+            "download_sha256": "",
+            "download_size": 0,
+            "download_url": "",
+            "install_size": 0
+        }
+    ]
+}

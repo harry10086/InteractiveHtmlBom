@@ -1,31 +1,232 @@
-name: Build and publish a release
+name: Release KiCad PCM Package
 
 on:
-  workflow_dispatch:
   push:
     tags:
-      - v**
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  pypi-deploy:
+  build-and-release:
     runs-on: ubuntu-latest
 
-    environment: release
-    permissions:
-      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install hatch
-    - name: Build package
-      run: hatch build
-    - name: Publish package distributions to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Get version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Tag: ${TAG}, Version: ${VERSION}"
+
+      - name: Verify LAST_TAG matches git tag
+        run: |
+          LAST_TAG=$(python3 -c "
+          import re, sys
+          text = open('InteractiveHtmlBom/version.py').read()
+          m = re.search(r\"LAST_TAG\\s*=\\s*['\\\"]([^'\\\"]+)['\\\"]\", text)
+          print(m.group(1) if m else '')
+          ")
+          echo "LAST_TAG in version.py: ${LAST_TAG}"
+          if [ "${LAST_TAG}" != "${{ steps.version.outputs.tag }}" ]; then
+            echo "ERROR: LAST_TAG (${LAST_TAG}) does not match git tag (${{ steps.version.outputs.tag }})"
+            exit 1
+          fi
+
+      - name: Build PCM zip package
+        id: build
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          ZIPNAME="InteractiveHtmlBom_${TAG}_pcm.zip"
+
+          # Create tmp staging area
+          mkdir -p tmp/plugins tmp/resources
+
+          # Copy plugin code (exclude __pycache__ and .ini)
+          rsync -a --exclude='__pycache__' --exclude='*.ini' \
+            InteractiveHtmlBom/ tmp/plugins/
+
+          # Copy resources (icon)
+          cp -r releases/resources/. tmp/resources/
+
+          # Update metadata.json version
+          python3 - <<'EOF'
+          import json, sys
+          path = "releases/metadata.json"
+          data = json.load(open(path))
+          data["versions"][0]["version"] = "${{ steps.version.outputs.version }}"
+          json.dump(data, open(path, "w"), indent=4, ensure_ascii=False)
+          EOF
+
+          # Copy metadata.json into staging
+          cp releases/metadata.json tmp/metadata.json
+
+          # Create PCM zip
+          mkdir -p dist
+          cd tmp && zip -r ../dist/${ZIPNAME} . && cd ..
+
+          # Compute sha256 and size
+          SHA256=$(sha256sum dist/${ZIPNAME} | awk '{print $1}')
+          SIZE=$(stat -c%s dist/${ZIPNAME})
+
+          echo "zip_name=${ZIPNAME}" >> "$GITHUB_OUTPUT"
+          echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
+          echo "size=${SIZE}" >> "$GITHUB_OUTPUT"
+          echo "Built: dist/${ZIPNAME} (sha256=${SHA256}, size=${SIZE})"
+
+      - name: Create GitHub Release and upload asset
+        id: release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "InteractiveHtmlBom ${{ steps.version.outputs.tag }} (中文版)"
+          body: |
+            ## InteractiveHtmlBom ${{ steps.version.outputs.tag }} 中文版
+
+            ### 通过 KiCad PCM 安装（推荐）
+            在 KiCad 插件管理器中添加以下库链接：
+            ```
+            https://raw.githubusercontent.com/${{ github.repository }}/gh-pages/repository.json
+            ```
+
+            ### 手动安装
+            下载 `${{ steps.build.outputs.zip_name }}`，在 KiCad 插件管理器中选择"从文件安装"。
+          files: dist/${{ steps.build.outputs.zip_name }}
+          draft: false
+          prerelease: false
+
+      - name: Update PCM repository metadata on gh-pages
+        env:
+          ZIP_NAME: ${{ steps.build.outputs.zip_name }}
+          SHA256: ${{ steps.build.outputs.sha256 }}
+          SIZE: ${{ steps.build.outputs.size }}
+          VERSION: ${{ steps.version.outputs.version }}
+          TAG: ${{ steps.version.outputs.tag }}
+          DOWNLOAD_URL: ${{ fromJson(steps.release.outputs.assets)[0].browser_download_url }}
+          REPO: ${{ github.repository }}
+        run: |
+          # Compute install size (unzipped)
+          INSTALL_SIZE=$(unzip -l dist/${ZIP_NAME} | tail -1 | awk '{print $1}')
+
+          python3 - <<EOF
+          import json, os, hashlib, time
+          from datetime import datetime, timezone
+
+          repo = os.environ["REPO"]
+          version = os.environ["VERSION"]
+          tag = os.environ["TAG"]
+          download_url = os.environ["DOWNLOAD_URL"]
+          sha256 = os.environ["SHA256"]
+          size = int(os.environ["SIZE"])
+          install_size = int(os.environ.get("INSTALL_SIZE", "0"))
+
+          # Load base metadata
+          meta = json.load(open("releases/metadata.json"))
+
+          # Build packages.json entry
+          entry = dict(meta)
+          ver_entry = {
+              "version": version,
+              "status": "stable",
+              "kicad_version": "7.0",
+              "download_sha256": sha256,
+              "download_size": size,
+              "download_url": download_url,
+              "install_size": install_size,
+          }
+          # Keep only this version (or prepend to existing list later)
+          entry["versions"] = [ver_entry]
+
+          # Try to load existing packages.json from gh-pages checkout
+          import subprocess, pathlib
+          pathlib.Path("gh-pages").mkdir(exist_ok=True)
+          result = subprocess.run(
+              ["git", "fetch", "origin", "gh-pages"],
+              capture_output=True)
+          result2 = subprocess.run(
+              ["git", "show", "origin/gh-pages:packages.json"],
+              capture_output=True, text=True)
+          if result2.returncode == 0:
+              existing = json.loads(result2.stdout)
+              pkg_list = existing.get("packages", [])
+              # Remove old versions of our package
+              pkg_list = [p for p in pkg_list
+                          if p.get("identifier") != meta["identifier"]]
+          else:
+              pkg_list = []
+
+          pkg_list.insert(0, entry)
+
+          packages = {"packages": pkg_list}
+          json.dump(packages, open("gh-pages/packages.json", "w"),
+                    indent=2, ensure_ascii=False)
+          print("packages.json written")
+
+          # packages.json sha256
+          pkg_bytes = open("gh-pages/packages.json", "rb").read()
+          pkg_sha256 = hashlib.sha256(pkg_bytes).hexdigest()
+          now = datetime.now(timezone.utc)
+          ts = int(now.timestamp())
+          ts_str = now.strftime("%Y-%m-%d %H:%M:%S")
+
+          repo_json = {
+              "name": "harry10086 KiCad Repository (InteractiveHtmlBom 中文版)",
+              "maintainer": {
+                  "name": "harry10086",
+                  "contact": {
+                      "web": f"https://github.com/{repo}"
+                  }
+              },
+              "packages": {
+                  "url": f"https://raw.githubusercontent.com/{repo}/gh-pages/packages.json",
+                  "sha256": pkg_sha256,
+                  "update_timestamp": ts,
+                  "update_time_utc": ts_str,
+              }
+          }
+          json.dump(repo_json, open("gh-pages/repository.json", "w"),
+                    indent=2, ensure_ascii=False)
+          print("repository.json written")
+
+          # Write simple index.html
+          html = f"""<!DOCTYPE html>
+          <html lang="zh-CN">
+          <head><meta charset="UTF-8"><title>InteractiveHtmlBom KiCad Repository</title></head>
+          <body>
+          <h1>InteractiveHtmlBom 中文版 KiCad 插件库</h1>
+          <p>在 KiCad 插件管理器 → 管理库链接 中添加以下地址：</p>
+          <pre>https://raw.githubusercontent.com/{repo}/gh-pages/repository.json</pre>
+          <p>最新版本：<strong>{version}</strong> ({ts_str} UTC)</p>
+          </body></html>"""
+          open("gh-pages/index.html", "w").write(html)
+          print("index.html written")
+          EOF
+
+      - name: Deploy gh-pages
+        run: |
+          cd gh-pages
+          git init
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: update PCM repository for ${{ steps.version.outputs.tag }}"
+          git push --force \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+            HEAD:gh-pages

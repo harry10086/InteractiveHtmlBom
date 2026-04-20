@@ -15,7 +15,7 @@ else:
 
 
 def pop_error(msg):
-    wx.MessageBox(msg, 'Error', wx.OK | wx.ICON_ERROR)
+    wx.MessageBox(msg, '错误', wx.OK | wx.ICON_ERROR)
 
 
 def get_btn_bitmap(bitmap):
@@ -67,15 +67,15 @@ class SettingsDialogPanel(dialog_base.SettingsDialogPanel):
         self.html = HtmlSettingsPanel(self.notebook)
         self.fields = FieldsPanel(self.notebook, extra_data_func,
                                   extra_data_wildcard)
-        self.notebook.AddPage(self.general, "General")
-        self.notebook.AddPage(self.html, "Html defaults")
-        self.notebook.AddPage(self.fields, "Fields")
+        self.notebook.AddPage(self.general, "常规")
+        self.notebook.AddPage(self.html, "HTML 默认值")
+        self.notebook.AddPage(self.fields, "字段")
 
         self.save_menu = wx.Menu()
         self.save_locally = self.save_menu.Append(
-            wx.ID_ANY, u"Locally", wx.EmptyString, wx.ITEM_NORMAL)
+            wx.ID_ANY, u"本地保存", wx.EmptyString, wx.ITEM_NORMAL)
         self.save_globally = self.save_menu.Append(
-            wx.ID_ANY, u"Globally", wx.EmptyString, wx.ITEM_NORMAL)
+            wx.ID_ANY, u"全局保存", wx.EmptyString, wx.ITEM_NORMAL)
 
         self.Bind(
             wx.EVT_MENU, self.OnSaveLocally, id=self.save_locally.GetId())
@@ -158,8 +158,8 @@ class GeneralSettingsPanel(dialog_base.GeneralSettingsPanelBase):
 
     def OnComponentSortOrderAdd(self, event):
         item = wx.GetTextFromUser(
-            "Characters other than A-Z will be ignored.",
-            "Add sort order item")
+            "A-Z 以外的字符将被忽略。",
+            "添加排序项")
         item = re.sub('[^A-Z]', '', item.upper())
         if item == '':
             return
@@ -176,7 +176,7 @@ class GeneralSettingsPanel(dialog_base.GeneralSettingsPanelBase):
         if selection != wx.NOT_FOUND:
             item = self.componentSortOrderBox.GetString(selection)
             if item == '~':
-                pop_error("You can not delete '~' item")
+                pop_error("不能删除 '~' 项")
                 return
             self.componentSortOrderBox.Delete(selection)
             if self.componentSortOrderBox.Count > 0:
@@ -184,8 +184,8 @@ class GeneralSettingsPanel(dialog_base.GeneralSettingsPanelBase):
 
     def OnComponentBlacklistAdd(self, event):
         item = wx.GetTextFromUser(
-            "Characters other than A-Z 0-9 and * will be ignored.",
-            "Add blacklist item")
+            "A-Z 0-9 和 * 以外的字符将被忽略。",
+            "添加黑名单项")
         item = re.sub('[^A-Z0-9*]', '', item.upper())
         if item == '':
             return
@@ -204,7 +204,7 @@ class GeneralSettingsPanel(dialog_base.GeneralSettingsPanelBase):
                 self.blacklistBox.SetSelection(max(selection - 1, 0))
 
     def OnNameFormatHintClick(self, event):
-        wx.MessageBox(self.file_name_format_hint, 'File name format help',
+        wx.MessageBox(self.file_name_format_hint, '文件名格式帮助',
                       style=wx.ICON_NONE | wx.OK)
 
     def OnSize(self, event):
@@ -256,7 +256,7 @@ class FieldsPanel(dialog_base.FieldsPanelBase):
         picker_parent = self.extraDataFilePicker.GetParent()
         new_picker = wx.FilePickerCtrl(
             picker_parent, wx.ID_ANY, wx.EmptyString,
-            u"Select a file",
+            u"选择文件",
             extra_data_wildcard,
             wx.DefaultPosition, wx.DefaultSize,
             (wx.FLP_DEFAULT_STYLE | wx.FLP_FILE_MUST_EXIST | wx.FLP_OPEN |

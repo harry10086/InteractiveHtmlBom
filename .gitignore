@@ -4,7 +4,8 @@
 *.iml
 *.bak
 test
-releases
+# Ignore generated release zips and version subfolders, but track metadata.json and resources
+releases/v*/
 demo
 *config.ini
 InteractiveHtmlBom/web/user*

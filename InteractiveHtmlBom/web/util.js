@@ -372,11 +372,11 @@ function loadSettings() {
       try {
         newSettings = JSON.parse(content);
       } catch (e) {
-        alert("Selected file is not InteractiveHtmlBom settings file.");
+        alert("所选文件不是 InteractiveHtmlBom 设置文件。");
         return;
       }
       if (newSettings.type != "InteractiveHtmlBom settings") {
-        alert("Selected file is not InteractiveHtmlBom settings file.");
+        alert("所选文件不是 InteractiveHtmlBom 设置文件。");
         return;
       }
       var metadataMatches = newSettings.hasOwnProperty("pcbmetadata");
@@ -391,10 +391,10 @@ function loadSettings() {
         var currentMetadata = JSON.stringify(pcbdata.metadata, null, 4);
         var fileMetadata = JSON.stringify(newSettings.pcbmetadata, null, 4);
         if (!confirm(
-          `Settins file metadata does not match current metadata.\n\n` +
-          `Page metadata:\n${currentMetadata}\n\n` +
-          `Settings file metadata:\n${fileMetadata}\n\n` +
-          `Press OK if you would like to import settings anyway.`)) {
+          `设置文件的元数据与当前元数据不匹配。\n\n` +
+          `当前页面元数据：\n${currentMetadata}\n\n` +
+          `设置文件元数据：\n${fileMetadata}\n\n` +
+          `如果您仍要导入设置，请点击确定o`)) {
           return;
         }
       }
@@ -407,8 +407,8 @@ function loadSettings() {
 
 function resetSettings() {
   if (!confirm(
-    `This will reset all checkbox states and other settings.\n\n` +
-    `Press OK if you want to continue.`)) {
+    `此操作将重置所有复选框状态和其他设置。\n\n` +
+    `请点击确定以继续。`)) {
     return;
   }
   if (storage) {

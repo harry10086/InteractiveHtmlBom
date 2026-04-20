@@ -570,12 +570,12 @@ function populateBomHeader(placeHolderColumn = null, placeHolderElements = null)
     }
   }
   if (settings.bommode == "netlist") {
-    tr.appendChild(createColumnHeader("Net name", "bom-netname", (a, b) => {
+    tr.appendChild(createColumnHeader("网络名称", "bom-netname", (a, b) => {
       if (a > b) return -1;
       if (a < b) return 1;
       return 0;
     }));
-    tr.appendChild(createColumnHeader("Color", "bom-color", (a, b) => {
+    tr.appendChild(createColumnHeader("颜色", "bom-color", (a, b) => {
       return 0;
     }));
   } else {
@@ -600,7 +600,7 @@ function populateBomHeader(placeHolderColumn = null, placeHolderElements = null)
           tr.appendChild(th);
         }
       } else if (column === "References") {
-        tr.appendChild(createColumnHeader("References", "references", (a, b) => {
+        tr.appendChild(createColumnHeader("位号", "references", (a, b) => {
           var i = 0;
           while (i < a.length && i < b.length) {
             if (a[i][0] != b[i][0]) return compareRefs(a[i][0], b[i][0]);
@@ -609,7 +609,7 @@ function populateBomHeader(placeHolderColumn = null, placeHolderElements = null)
           return a.length - b.length;
         }));
       } else if (column === "Value") {
-        tr.appendChild(createColumnHeader("Value", "value", (a, b) => {
+        tr.appendChild(createColumnHeader("元件值", "value", (a, b) => {
           var ra = a[0][1], rb = b[0][1];
           return valueCompare(
             pcbdata.bom.parsedValues[ra], pcbdata.bom.parsedValues[rb],
@@ -618,9 +618,9 @@ function populateBomHeader(placeHolderColumn = null, placeHolderElements = null)
         return;
       } else if (column === "Footprint") {
         tr.appendChild(createColumnHeader(
-          "Footprint", "footprint", stringFieldCompareClosure(footprintIndex)));
+          "封装", "footprint", stringFieldCompareClosure(footprintIndex)));
       } else if (column === "Quantity" && settings.bommode == "grouped") {
-        tr.appendChild(createColumnHeader("Quantity", "quantity", (a, b) => {
+        tr.appendChild(createColumnHeader("数量", "quantity", (a, b) => {
           return a.length - b.length;
         }));
       } else {
@@ -893,7 +893,7 @@ function changeCanvasLayout(layout) {
 
 function populateMetadata() {
   document.getElementById("title").innerHTML = pcbdata.metadata.title;
-  document.getElementById("revision").innerHTML = "Rev: " + pcbdata.metadata.revision;
+  document.getElementById("revision").innerHTML = "版本：" + pcbdata.metadata.revision;
   document.getElementById("company").innerHTML = pcbdata.metadata.company;
   document.getElementById("filedate").innerHTML = pcbdata.metadata.date;
   if (pcbdata.metadata.title != "") {
@@ -1179,7 +1179,7 @@ function populateMarkWhenCheckedOptions() {
 
     container.appendChild(div);
   }
-  createOption("", "None");
+  createOption("", "无");
   for (var checkbox of settings.checkboxes) {
     createOption(checkbox, checkbox);
   }

@@ -1,0 +1,15 @@
+{
+  "name": "harry10086 KiCad 插件库 (InteractiveHtmlBom 中文版)",
+  "maintainer": {
+    "name": "harry10086",
+    "contact": {
+      "web": "https://github.com/harry10086/InteractiveHtmlBom"
+    }
+  },
+  "packages": {
+    "url": "https://raw.githubusercontent.com/harry10086/InteractiveHtmlBom/gh-pages/packages.json",
+    "sha256": "2f880f2558b01549b9be48c3ae21341714b2e720e02426cfec88c74fc938e622",
+    "update_timestamp": 1776664571,
+    "update_time_utc": "2026-04-20 05:56:11"
+  }
+}

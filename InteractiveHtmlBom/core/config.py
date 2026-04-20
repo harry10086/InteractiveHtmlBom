@@ -34,7 +34,7 @@ class Config:
         'HS', 'CNN', 'J', 'P', 'NT', 'MH',
     ]
     highlight_pin1_choices = ['none', 'all', 'selected']
-    default_checkboxes = ['Sourced', 'Placed']
+    default_checkboxes = ['已备料', '已贴片']
     html_config_fields = [
         'dark_mode', 'show_pads', 'show_fabrication', 'show_silkscreen',
         'highlight_pin1', 'redraw_on_drag', 'board_rotation', 'checkboxes',
@@ -330,7 +330,7 @@ class Config:
 
         if self.kicad_variant != '':
             dlg.fields.variantLabel.Show()
-        dlg.fields.variantLabel.SetLabel(f'Current variant: {self.kicad_variant}')
+        dlg.fields.variantLabel.SetLabel(f'当前变体： {self.kicad_variant}')
 
         dlg.finish_init()
 

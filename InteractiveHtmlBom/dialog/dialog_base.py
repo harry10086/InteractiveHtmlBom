@@ -155,7 +155,7 @@ class HtmlSettingsPanelBase ( wx.Panel ):
 
         sbSizer31 = wx.StaticBoxSizer( wx.StaticBox( self, wx.ID_ANY, u"复选框" ), wx.HORIZONTAL )
 
-        self.bomCheckboxesCtrl = wx.TextCtrl( sbSizer31.GetStaticBox(), wx.ID_ANY, u"Sourced,Placed", wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.bomCheckboxesCtrl = wx.TextCtrl( sbSizer31.GetStaticBox(), wx.ID_ANY, u"已备料,已贴片", wx.DefaultPosition, wx.DefaultSize, 0 )
         sbSizer31.Add( self.bomCheckboxesCtrl, 1, wx.ALL, 5 )
 
 

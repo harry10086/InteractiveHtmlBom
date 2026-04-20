@@ -8,7 +8,7 @@
     "author": {
         "name": "qu1ck (zh fork by harry10086)",
         "contact": {
-            "web": "https://github.com/harry10086/InteractiveHtmlBom"
+            "web": "https://github.com/openscopeproject/InteractiveHtmlBom"
         }
     },
     "maintainer": {
@@ -21,10 +21,16 @@
     "resources": {
         "homepage": "https://github.com/harry10086/InteractiveHtmlBom"
     },
-    "tags": ["bom", "ibom", "interactive", "kicad", "chinese"],
+    "tags": [
+        "bom",
+        "ibom",
+        "interactive",
+        "kicad",
+        "chinese"
+    ],
     "versions": [
         {
-            "version": "2.11.1",
+            "version": "2.11.2",
             "status": "stable",
             "kicad_version": "7.0",
             "download_sha256": "",

@@ -19,16 +19,24 @@
 
 安装说明请参阅 [项目 Wiki](https://github.com/openscopeproject/InteractiveHtmlBom/wiki/Installation)。
 
+### 通过 KiCad PCM 安装（推荐）
+在 KiCad 插件管理器 → 管理库链接 中添加：
+```
+https://raw.githubusercontent.com/harry10086/InteractiveHtmlBom/gh-pages/repository.json
+```
+
+### 手动安装
+下载附件 `InteractiveHtmlBom_v2.11.2_pcm.zip`，
+在 KiCad 插件管理器中选择"从文件安装"。
+
 ## 许可证与致谢
 
 插件代码以 MIT 许可证授权，详细信息请参阅 `LICENSE` 文件。
 
 HTML 页面使用了以下开源库，均已内嵌至生成的 BOM 页面中：
 [Split.js](https://github.com/nathancahill/Split.js)、
-[PEP.js](https://github.com/jquery/PEP) 和（精简版）
-[lz-string.js](https://github.com/pieroxy/lz-string)。
+[PEP.js](https://github.com/jquery/PEP) 和（精简版）[lz-string.js](https://github.com/pieroxy/lz-string)。
 
 `units.py` 来自 [KiBom](https://github.com/SchrodingersGat/KiBoM) 插件（MIT 许可证）。
 
-`svgpath.py` 主要基于
-[svgpathtools](https://github.com/mathandy/svgpathtools) 模块（MIT 许可证）。
+`svgpath.py` 主要基于 [svgpathtools](https://github.com/mathandy/svgpathtools) 模块（MIT 许可证）。

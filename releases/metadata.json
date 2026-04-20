@@ -21,7 +21,7 @@
     "resources": {
         "homepage": "https://github.com/harry10086/InteractiveHtmlBom"
     },
-    "tags": ["bom", "ibom", "interactive", "kicad", "中文"],
+    "tags": ["bom", "ibom", "interactive", "kicad", "chinese"],
     "versions": [
         {
             "version": "2.11.1",

@@ -40,10 +40,15 @@ jobs:
           else
             TAG="${GITHUB_REF_NAME}"
           fi
-          VERSION="${TAG#v}"
-          echo "tag=${TAG}"     >> "$GITHUB_OUTPUT"
+          # KiCad PCM requires version format: ^\d{1,4}(\.\d{1,4}(\.\d{1,6})?)?$
+          # Extract only the numeric MAJOR.MINOR.PATCH part (strip leading v and any suffix like -zh)
+          VERSION=$(echo "${TAG}" | grep -oP '\d+\.\d+\.\d+' | head -1)
+          if [ -z "${VERSION}" ]; then
+            VERSION=$(echo "${TAG#v}" | grep -oP '^\d+(\.\d+)?' | head -1)
+          fi
+          echo "tag=${TAG}"         >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "Tag: ${TAG}, Version: ${VERSION}"
+          echo "Tag: ${TAG}, PCM Version: ${VERSION}"
 
       # ── Build PCM zip ────────────────────────────────────────────────────
       - name: Build PCM zip
@@ -164,8 +169,15 @@ jobs:
               capture_output=True, text=True)
           if r.returncode == 0:
               existing = json.loads(r.stdout)
-              pkg_list = [p for p in existing.get("packages", [])
-                          if p.get("identifier") != meta["identifier"]]
+              pkg_list = [
+                  p for p in existing.get("packages", [])
+                  # Remove old entries for our package AND any entries with invalid/empty sha256
+                  if p.get("identifier") != meta["identifier"]
+                  and all(
+                      v.get("download_sha256", "") not in ("", "0", None)
+                      for v in p.get("versions", [])
+                  )
+              ]
           else:
               pkg_list = []
           pkg_list.insert(0, entry)

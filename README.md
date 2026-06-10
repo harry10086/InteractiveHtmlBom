@@ -29,6 +29,10 @@ https://raw.githubusercontent.com/harry10086/InteractiveHtmlBom/gh-pages/reposit
 下载附件 `InteractiveHtmlBom_v2.11.2_pcm.zip`，
 在 KiCad 插件管理器中选择"从文件安装"。
 
+### 版本
+- v2.11.3 合并上游修改（ [v2.11.2](https://github.com/openscopeproject/InteractiveHtmlBom/compare/v2.11.1...v2.11.2) ）；
+- v2.11.2 AI 汉化；
+
 ## 许可证与致谢
 
 插件代码以 MIT 许可证授权，详细信息请参阅 `LICENSE` 文件。
